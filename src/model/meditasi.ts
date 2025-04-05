@@ -2,11 +2,17 @@ import { IsDate, IsInt, IsString,IsUppercase } from "class-validator";
 import { Entity,PrimaryGeneratedColumn,Column,CreateDateColumn,UpdateDateColumn,DeleteDateColumn, OneToMany, ManyToOne, JoinColumn, Int32 } from "typeorm";
 import { User } from "./User";
 
-
-export enum StatusJurnal {
-    ONGOING = 'ONGOING',
-    COMPLETED = 'COMPLETED'
+export enum jenisMeditasi {
+    MEDITASI = 'MEDITASI',
+    LELAP = 'LELAP'
 }
+
+
+export enum rekmonedasiMditasi {
+    SERI = 'SERI',
+    INSTAN = 'INSTAN'
+}
+
 
 @Entity()
 export class jurnal{
@@ -20,14 +26,14 @@ export class jurnal{
         nullable: true
     })
     @IsString()
-    public topikJurnal: string
+    public topikMeditasi: string
 
     @Column({
         default: null,
         nullable: true
     })
     @IsString()
-    public isiJurnal: string
+    public isiContent: string
 
     @Column({
         type: 'timestamp', // Tambahkan tipe eksplisit
@@ -35,17 +41,17 @@ export class jurnal{
         nullable: true
     })
     @IsDate()
-    public tanggalRilisJurnal: Date
+    public reminderMEditasi: Date
 
 
     @Column({
         type: 'enum',
-        enum: StatusJurnal,
-        default: StatusJurnal.ONGOING
+        enum: jenisMeditasi,
+        default: null
     })
     @IsString()
     @IsUppercase()
-    public status: StatusJurnal
+    public status: jenisMeditasi
 
 
     @Column({
