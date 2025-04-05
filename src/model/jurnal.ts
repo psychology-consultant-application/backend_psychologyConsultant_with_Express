@@ -3,33 +3,31 @@ import { Entity,PrimaryGeneratedColumn,Column,CreateDateColumn,UpdateDateColumn,
 import { User } from "./User";
 
 
-export enum StatusAppoinment {
+export enum StatusJurnal {
     ONGOING = 'ONGOING',
     COMPLETED = 'DONE'
 }
 
 @Entity()
-export class appoinment{
+export class jurnal{
 
     @PrimaryGeneratedColumn('uuid')
     public id : string
 
     
     @Column({
-        type: 'varchar', // Tambahkan tipe eksplisit
         default: null,
         nullable: true
     })
     @IsString()
-    public meetLink: string
+    public topikJurnal: string
 
     @Column({
-        type: 'int', // Tambahkan tipe eksplisit
         default: null,
         nullable: true
     })
-    @IsInt()
-    public durationMinute: number
+    @IsString()
+    public isiJurnal: string
 
     @Column({
         type: 'timestamp', // Tambahkan tipe eksplisit
@@ -42,12 +40,12 @@ export class appoinment{
 
     @Column({
         type: 'enum',
-        enum: StatusAppoinment,
-        default: StatusAppoinment.ONGOING
+        enum: StatusJurnal,
+        default: StatusJurnal.ONGOING
     })
     @IsString()
     @IsUppercase()
-    public status: StatusAppoinment
+    public status: StatusJurnal
 
     @CreateDateColumn()
     public createdAt: Date
