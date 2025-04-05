@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { 
-    generateMeetLink, 
+    createAppoinment, 
     getAppoinmentDetails, 
     updateAppoinmentStatus,
     listAppoinments 
@@ -8,7 +8,7 @@ import {
 
 
 const router = Router()
-router.post('/generate-meet-link', generateMeetLink);
+router.post('/generate-meet-link', createAppoinment);
 router.get('/appoinment/:id', getAppoinmentDetails);
 router.patch('/appoinment/:id/status', updateAppoinmentStatus);
 router.get('/appoinments', listAppoinments);
