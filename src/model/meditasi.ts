@@ -15,7 +15,7 @@ export enum rekmonedasiMditasi {
 
 
 @Entity()
-export class jurnal{
+export class meditasi{
 
     @PrimaryGeneratedColumn('uuid')
     public id : string
