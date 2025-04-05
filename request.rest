@@ -43,4 +43,18 @@ Authorization: Bearer {{token}}
 
 
 
+###
+get  http://localhost:5000/api/v1//getMeditasi
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+
+###
+get  http://localhost:5000/api/v1/meditasi/getMeditasiById/3e24e97c-1270-11f0-abbc-a841f422e754
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+
+
+
 
