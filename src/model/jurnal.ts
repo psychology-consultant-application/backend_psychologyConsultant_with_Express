@@ -35,7 +35,7 @@ export class jurnal{
         nullable: true
     })
     @IsDate()
-    public appoinmentDate: Date
+    public tanggalRilisJurnal: Date
 
 
     @Column({
