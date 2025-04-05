@@ -47,6 +47,14 @@ export class jurnal{
     @IsUppercase()
     public status: StatusJurnal
 
+
+    @Column({
+        default: null,
+        nullable: true
+    })
+    @IsString()
+    public pasienId: string
+
     @CreateDateColumn()
     public createdAt: Date
 
@@ -57,14 +65,6 @@ export class jurnal{
     public deletedAt: Date
 
 
-    @ManyToOne (() => User, (pasienId) => pasienId.appoinmentPasien)
-    @JoinColumn()
-    public pasienId : User
-
-
-    @ManyToOne (() => User, (psychologyId) => psychologyId.appoinmentPsychology)
-    @JoinColumn()
-    public psychologyId : User
 
 
 }
