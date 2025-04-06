@@ -27,6 +27,21 @@ export class appoinment{
     @IsString()
     public meetLink: string
 
+        
+    @Column({
+        default: null,
+        nullable: true
+    })
+    @IsString()
+    public topikMasalah: string
+
+    @Column({
+        default: null,
+        nullable: true
+    })
+    @IsString()
+    public deskripsiMasalah: string
+
     @Column({
         type: 'int', // Tambahkan tipe eksplisit
         default: null,

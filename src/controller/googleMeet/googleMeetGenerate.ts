@@ -10,20 +10,22 @@ const userRepository = AppDataSource.getRepository(User);
 const appoinmentRepository = AppDataSource.getRepository(appoinment);
 
 export const createAppoinment = async (req: Request, res: Response) => {
-    // Skema validasi input
-    const createAppoinmentSchema = (input) => Joi.object({
-        pasienId: Joi.string().required(),
-        psychologyId: Joi.string().required(),
-        appoinmentDate: Joi.date().iso().required(),
+    // Comprehensive validation schema
+    const createAppoinmentSchema = Joi.object({
+        pasienId: Joi.string().uuid().required(),
+        psychologyId: Joi.string().uuid().required(),
+        appoinmentDate: Joi.date().iso().min('now').required(),
         durationMinute: Joi.number().min(15).max(120).required(),
-        meetLink: Joi.string().uri().required() // Tambahkan validasi manual meet link
-    }).validate(input);
+        meetLink: Joi.string().uri().required(),
+        topikMasalah: Joi.string().optional(),
+        deskripsiMasalah: Joi.string().optional()
+    });
 
     try {
-        // Validasi input
-        const schema = createAppoinmentSchema(req.body);
-        if ('error' in schema) {
-            return res.status(422).send(validationResponse(schema));
+        // Validate input
+        const { error, value } = createAppoinmentSchema.validate(req.body);
+        if (error) {
+            return res.status(422).send(validationResponse(error.details));
         }
 
         const { 
@@ -31,10 +33,12 @@ export const createAppoinment = async (req: Request, res: Response) => {
             psychologyId, 
             appoinmentDate, 
             durationMinute,
-            meetLink 
-        } = req.body;
+            meetLink,
+            topikMasalah,
+            deskripsiMasalah
+        } = value;
 
-        // Validasi peserta
+        // Validate participants
         const pasien = await userRepository.findOne({ 
             where: { id: pasienId, role: UserRole.PASIEN } 
         });
@@ -46,28 +50,31 @@ export const createAppoinment = async (req: Request, res: Response) => {
             return res.status(404).send(errorResponse('Peserta tidak ditemukan', 404));
         }
 
-        // Hitung waktu mulai dan selesai
+
+        // Calculate start and end times
         const startTime = new Date(appoinmentDate);
         const endTime = new Date(startTime.getTime() + (durationMinute * 60000));
 
-        // Buat entri appoinment baru
+        // Create new appointment entry
         const newAppoinment = appoinmentRepository.create({
             id: uuidv4(),
             pasienId: pasien,
             psychologyId: psychology,
             appoinmentDate: startTime,
             durationMinute: durationMinute,
-            meetLink: meetLink, // Gunakan meet link manual
+            meetLink: meetLink,
+            topikMasalah: topikMasalah,
+            deskripsiMasalah: deskripsiMasalah,
             status: StatusAppoinment.PENDING
         });
 
-        // Simpan appoinment
+        // Save appointment
         await appoinmentRepository.save(newAppoinment);
 
-        return res.status(200).send(successResponse('Buat Appoinment Berhasil', {
+        return res.status(201).send(successResponse('Buat Appoinment Berhasil', {
             meetLink,
             appoinmentId: newAppoinment.id
-        }, 200));
+        }, 201));
 
     } catch (error) {
         console.error('Error membuat appoinment:', error);
@@ -75,108 +82,21 @@ export const createAppoinment = async (req: Request, res: Response) => {
     }
 };
 
-// Fungsi lainnya tetap sama seperti sebelumnya
-export const getAppoinmentDetails = async (req: Request, res: Response) => {
+export const getAppoinment = async (req: Request, res: Response) => {
     try {
-        // Cek otorisasi pengguna
-        const userAccess = await userRepository.findOneBy({ id: req.jwtPayload.id });
-        if (!userAccess) {
-            return res.status(403).send(errorResponse('Unauthorized', 403));
-        }
-
-        const { id } = req.params;
-
-        const appoinmentDetails = await appoinmentRepository.findOne({
-            where: { id },
-            relations: ['pasienId', 'psychologyId']
-        });
-
-        if (!appoinmentDetails) {
-            return res.status(404).send(errorResponse('Appoinment tidak ditemukan', 404));
-        }
-
-        return res.status(200).send(successResponse('Detail Appoinment', { 
-            data: appoinmentDetails 
-        }, 200));
-
-    } catch (error) {
-        console.error('Error getting appoinment details:', error);
-        return res.status(500).send(errorResponse('Gagal mengambil detail appoinment', 500));
-    }
-};
-
-export const updateAppoinmentStatus = async (req: Request, res: Response) => {
-    // Skema validasi input status
-    const updateStatusSchema = (input) => Joi.object({
-        status: Joi.string()
-            .valid(...Object.values(StatusAppoinment))
-            .required()
-    }).validate(input);
-
-    try {
-        // Validasi input
-        const schema = updateStatusSchema(req.body);
-        if ('error' in schema) {
-            return res.status(422).send(validationResponse(schema));
-        }
-
-        // Cek otorisasi pengguna
-        const userAccess = await userRepository.findOneBy({ id: req.jwtPayload.id });
-        if (!userAccess || 
-            (userAccess.role !== UserRole.ADMIN && 
-             userAccess.role !== UserRole.CONSULTANT)) {
-            return res.status(403).send(errorResponse('Unauthorized to update appoinment status', 403));
-        }
-
-        const { id } = req.params;
-        const { status } = req.body;
-
-        const appoinmentToUpdate = await appoinmentRepository.findOne({
-            where: { id }
-        });
-
-        if (!appoinmentToUpdate) {
-            return res.status(404).send(errorResponse('Appoinment tidak ditemukan', 404));
-        }
-
-        appoinmentToUpdate.status = status as StatusAppoinment;
-        await appoinmentRepository.save(appoinmentToUpdate);
-
-        return res.status(200).send(successResponse('Status Appoinment Berhasil Diupdate', {
-            data: appoinmentToUpdate
-        }, 200));
-
-    } catch (error) {
-        console.error('Error updating appoinment status:', error);
-        return res.status(500).send(errorResponse('Gagal update status appoinment', 500));
-    }
-};
-
-export const listAppoinments = async (req: Request, res: Response) => {
-    try {
-        const { 
-            limit: queryLimit, 
-            page, 
-            status 
-        } = req.query;
-
-        // Cek otorisasi pengguna
-        const userAccess = await userRepository.findOneBy({ id: req.jwtPayload.id });
-        if (!userAccess) {
-            return res.status(403).send(errorResponse('Unauthorized', 403));
-        }
+        const { limit: queryLimit, page: page, title } = req.query
 
         const queryBuilder = appoinmentRepository.createQueryBuilder('appoinment')
-            .leftJoinAndSelect('appoinment.pasienId', 'pasien')
-            .leftJoinAndSelect('appoinment.psychologyId', 'psychology')
-            .orderBy('appoinment.createdAt', 'DESC');
+            .leftJoinAndSelect('appoinment.pasienId', 'pasien')  // Change alias to 'pasien'
+            .leftJoinAndSelect('appoinment.psychologyId', 'psychology')  // Change alias to 'psychology'
+            .orderBy('appoinment.createdAt', 'DESC')
 
-        // Filter berdasarkan status jika diberikan
-        if (status) {
-            queryBuilder.andWhere('appoinment.status = :status', { status });
+        // Optional: Add filtering if needed
+        if (title) {
+            queryBuilder.andWhere('appoinment.topikMasalah LIKE :title', { title: `%${title}%` })
         }
 
-        const dynamicLimit = queryLimit ? parseInt(queryLimit as string) : 10;
+        const dynamicLimit = queryLimit ? parseInt(queryLimit as string) : 10; // Default limit of 10
         const currentPage = page ? parseInt(page as string) : 1;
         const skip = (currentPage - 1) * dynamicLimit;
 
@@ -185,15 +105,44 @@ export const listAppoinments = async (req: Request, res: Response) => {
             .take(dynamicLimit)
             .getManyAndCount();
 
-        return res.status(200).send(successResponse('Daftar Appoinment', {
+        res.status(200).json({
             data,
             totalCount,
             currentPage,
-            totalPages: Math.ceil(totalCount / dynamicLimit)
-        }, 200));
+            totalPages: Math.ceil(totalCount / dynamicLimit),
+        })
 
     } catch (error) {
-        console.error('Error listing appoinments:', error);
-        return res.status(500).send(errorResponse('Gagal mengambil daftar appoinment', 500));
+        console.error('Error in getAppoinment:', error);
+        res.status(500).json({ 
+            msg: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined 
+        })
     }
-};
+}
+
+
+
+export const getAppoinmentById = async (req: Request, res: Response) => {
+    try {
+
+
+        const newsId = req.params.id
+        const response = await appoinmentRepository.find({
+            relations : ['pasienId','psychologyId'],
+            where: {
+                id: newsId,
+            },
+        });
+        console.log(response)
+
+        const news = response[0]
+        res.status(200).json(response);
+
+
+
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ msg: error.message })
+    }
+}

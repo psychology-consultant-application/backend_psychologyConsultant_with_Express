@@ -1,4 +1,4 @@
-@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUxYmYxYzY2LWExN2MtNDU3ZC05NmY1LTRiN2M4ZjJkYjJmMSIsInVzZXJOYW1lIjoiQWRtaW4xIiwicGFzc3dvcmQiOiIkMmEkMDgkZHNJZmRha29ydktkblpoRkNZYnhuT3ZPenNReXZINXJSay80L1Q5RGt0NzkvRFg4Mi5rd3kiLCJjcmVhdGVkQXQiOiIyMDI1LTAxLTEzVDIwOjUyOjE2LjU3MVoiLCJpYXQiOjE3MzY4MDIxODUsImV4cCI6MTczOTM5NDE4NX0.EqgvUNyCc-sRNUyadvJv_G4R7wmMSU9xPZ-QenCiOfo
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjA3MTcwMGQ4LTA1NDUtNDNiYi1iZmJkLTRmYWMxNzY0OWZmNyIsInVzZXJOYW1lIjoiUGFzaWVuMSIsInBhc3N3b3JkIjoiOWZiZjNmZWQyZWFiNzM0YTBlYTVlNmJkMzU2MDQ0NWQ6NDhjNTFjZDcyZjZjY2FiZWIwNmI0OTdiMjlmNTNkNWMiLCJjcmVhdGVkQXQiOiIyMDI1LTA0LTA1VDAxOjU3OjA1LjUxMloiLCJpYXQiOjE3NDM4OTgyOTMsImV4cCI6MTc0Mzg5ODI5NH0.MfhHMzmTJvoCt-vgrtsEgVznT5b6uxWrzP3K0PzR9-Q
 ###
 GET http://localhost:5000/api/v1/seeder/userSeeder
 Content-Type: application/json
@@ -7,8 +7,8 @@ Content-Type: application/json
 POST  http://localhost:5000/api/v1/auth/login
 Content-Type: application/json
 
-{     "userName"    : "Admin1",
-       "password" : "Admin123!"
+{     "userName"    : "Pasien1",
+       "password" : "Pasien123!"
 }
 
 ###
@@ -53,6 +53,32 @@ Authorization: Bearer {{token}}
 get  http://localhost:5000/api/v1/meditasi/getMeditasiById/3e24e97c-1270-11f0-abbc-a841f422e754
 Content-Type: application/json
 Authorization: Bearer {{token}}
+
+
+
+###
+POST  http://localhost:5000/api/v1/generate-meet/generate-meet-link
+Content-Type: application/json
+
+{
+   "pasienId": "071700d8-0545-43bb-bfbd-4fac17649ff7",
+    "psychologyId": "5e7e66a9-e6e3-4873-88eb-40d295383fcb",
+    "appoinmentDate": "2025-07-15T14:30:00Z",
+    "durationMinute": 60,
+    "meetLink": "https://meet.google.com/abc-defg-hij",
+    "topikMasalah": "Stress Kerja",
+    "deskripsiMasalah": "Mengalami tekanan berlebih di tempat kerja"
+}
+
+###
+get  http://localhost:5000/api/v1/generate-meet/getAppoinmentById/7db5c427-126f-11f0-abbc-a841f422e754
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+get  http://localhost:5000/api/v1/generate-meet/getAppoinment
+Authorization: Bearer {{token}}
+
 
 
 
