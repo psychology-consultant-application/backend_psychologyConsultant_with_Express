@@ -12,7 +12,13 @@ const app = express()
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: ['http://localhost:3000', 'http://localhost:3001'],
+        origin: [
+            'http://localhost:3000', 
+            'exp://192.168.1.7:8081', // Expo
+            'http://192.168.1.7:8081', // Tambahan untuk keamanan
+            'http://192.168.1.7:5000',  // Backend URL
+            'http://localhost:8081'
+        ],
 
         //for staging
         // origin: ['http://localhost:3000', 'http://localhost:3001','https://puskesmas-ngasem-fe.vercel.app/'],
@@ -27,7 +33,15 @@ AppDataSource.initialize().then(async () => {
 
     app.use(cors({
         credentials: true,
-        origin: ['http://localhost:3000', 'http://localhost:3001']
+        origin: [
+            'http://localhost:3000', 
+            'http://localhost:3001',
+            'exp://192.168.1.7:8081', // Expo
+            'http://192.168.1.7:8081', // Tambahan untuk keamanan
+            'http://192.168.1.7:5000',  // Backend URL
+            'http://localhost:8081'
+
+        ]
         //for staging
         // origin: ['http://localhost:3000', 'http://localhost:3001','https://puskesmas-ngasem-fe.vercel.app/','https://api.puskesmas-ngasem.cloud']
 
